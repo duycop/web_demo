@@ -1,0 +1,1 @@
+{"ok":1,"data":[{"name":".tieu-de","value":"test js thật chậm","unit":""},{"name":"#online","value":99,"unit":" <i>người</i>"},{"name":".doam","value":77,"unit":"%"},{"name":".nhietdo","value":28.7,"unit":"°C"},{"name":".dienap","value":220,"unit":"V"},{"name":"quat","value":1,"unit":""}]} 

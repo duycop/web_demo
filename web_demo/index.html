@@ -1,0 +1,189 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="jquery.min.js"></script>
+<script src="jquery-ui.min.js"></script>
+<link rel="stylesheet" href="jquery-ui.min.css"/>
+<style>
+  .quat{
+  	position: absolute; 
+  	height: 49px; width: 49px;
+  	background-size: 49px 49px;
+  	left: 65px; top: 30px;
+  }
+  
+  .quat.run{  /* thẻ chứa đồng thời 2 className là 'quat' và 'run' : 'quat run' */
+  	background-image:url('/images/fan_on.png');
+    -webkit-animation: spin 1s linear infinite;
+    -moz-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+  }
+  .quat.stop{
+  	background-image:url('/images/fan_off.png');
+  }
+  
+  
+@-moz-keyframes spin {
+    100% {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+
+</style>
+</head>
+<body>
+<b><span class="tieu-de">TEST IIS</span> <span id="online">1</span> online</b>
+<div class="nhietdo">loading nd...</div>
+<div class="doam">loading da...</div>
+<div class="dienap">loading vol...</div>
+<div class="quat"></div>
+
+<pre><code>
+1. tạo thư mục: d:\TEMP\test_web\
+2. tạo file d:\TEMP\test_web\index.html
+3. mở iis: tạo 1 web mới
+   + site name: gõ gì cũng đc (nhập trùng host name)
+   + path: d:\TEMP\test_web\
+   + host name: hello.com
+4. edit file c:\WINDOWS\SYSTEM32\Drivers\etc\hosts
+   dùng notepad với quyền administrator
+   + add 1 line vào cuối file: 127.0.0.1 hello.com
+   cứ khi nào cần DNS domain này ip nào?
+   thì máy lấy từ file hosts (local) ko cần DNS xịn
+5. Truy cập domain: hello.com
+   kq nhận được: IIS RUN, default index.html trả về trình duyệt
+6. có 1 api (c# asp.net): trả về json (đã làm)
+7. trang html: viết mã js để truy cập api:
+   + đường dẫn tương đối tới api: /api.js
+   + trả về dữ liệu dạng (value có thể sẽ khác) gì: {"ok":1, [{"name":"nhietdo","value":31.5,"unit":"ºC"},{"name":"dienap","value":234,"unit":"V"}]}
+   + sử dụng lệnh:
+ fetch(url_base_of_url?action=action_i)
+.then( res =>{return res.json()})
+.then( json => {
+  nếu json.ok thì duyệt mảng json.data => dosthing với mỗi item of array
+  dosthing: 
+    + update nhiều div cùng className : $('.selector_for_className').html(html_mới)
+    + update 1 phần tử: định vị nó bằng id : 
+      thì code js: $('#selector_for_id').html(html_mới)
+      cụ thể với &lt;span id="online"&gt;1&lt;/span&gt; thì code js: $('#online').html('123')
+      
+      
+});
+
+url_base_of_url : /api.aspx
+
+còn thêm vào sau : ?action=action_i
+tức là truy vấn đến /api.aspx?action=action_i
+truy vấn dạng GET này truyền thêm tham số: action, giá trị là action_i
+
+giúp 1 file api.aspx làm được nhiều việc:  tuỳ theo action gửi lên
+logic trong Page_load
+  + lấy biến string action gửi lên
+  + dùng if|switch để gọi hàm phù hợp với mỗi giá trị của biến action
+
+8. việc viết api.aspx trên c# asp.net như nào?
+ + tạo project loại asp.net Web application (.Net framework) (chọn ver thấp nhất vd 2.0)
+ + Configure for https: NO (ko checked): creating project (wait...60s)
+ + add vào project: web form => đổi tên:`WebForm1` => `api` => auto gen nhiều code (đợi nó xong 30s)
+ + file api.aspx (code html): xoá sạch, giữ lại line1 (ko thấy số thứ tự line2)
+ + file api.aspx.cs  -> viết code bên trong method : Page_Load
+   vd với logic lấy value mới nhất trong database IOT, tại table Sensor
+   các bước nhỏ:
+    + design database: tạo db, tables, fields (name, type, size, null,....): PK, FK,...
+    + hardware: Lấy đc thông tin từ cảm biến (nhiệt độ, độ ẩm, điện áp, ....)
+    + software: đọc đc hardware (truyền thông : rs232, rs485,...) => SQL change data in db
+    + api.aspx.cs : SQL để lấy newest data of sensors => chuyển thành json: chứa mảng các sensor
+      gửi json về client.
+      (demo trên lớp: lấy file data.txt làm dữ liệu, bỏ hw, sw, db...)
+    + build: tạo ra DLL (thành công bước 1)
+  
+9. Sử dụng IIS để chạy đc api.aspx
+   + control panel => window feath.. => checked : 2 mục internet infomation Service (iis), bỏ con FTP
+   + vào iis: Internet Information Services (IIS) Manager
+   + nhánh Sites
+     + add 1 website... (... === show diaglog để inputs) : điền 3 trường
+     + path: ko nhất thiết phải là path lúc tạo project code c#
+       copy những gì từ project code vào path của iis?
+       + copy tất những file .aspx
+       + tạo 1 folder `bin` : copy dll biên dịch được trong path...vs../bin  => vào bin iis
+       
+       cụ thể: iis tại path: `d:\TEMP\test_web`
+               vs đỏ project tại path: `D:\my documents\Visual Studio 2026\Projects\web_demo\web_demo\`
+               vs đỏ có bin chứa: web_demo.dll, web_demo.pdb, web_demo.dll.config
+               nhưng chỉ cần copy file `web_demo.dll` => `d:\TEMP\test_web\bin`
+   + test thành quả:
+     + mở trình duyệt: hello.com => thấy nội dung index.html (thành công 2)
+     + http://hello.com/api.aspx?action=sensor  => thấy json (thành công 3)
+     + code js để phối hợp nội dung json với các selector phù hợp, tinh tế, đẹp (css)
+10. cho kq iis lên online toàn cầu
+   + đăng ký domain xịn (free: *.id.vn dành cho công dân vn dưới 23 tuổi, mua mất $)
+   + đăng ký cloudflare
+   + add domain xịn => làm theo hướng dẫn (thay 2 dòng namespace trong máy chủ cung cấp tên miền, vd ở Mắt Bão)
+   + tạo cloudflare tunnel cài đặt trên máy tính muốn làm máy chủ (bật 24/24)
+   + máy tính có kết nối internet (quan trọng)
+   + tạo router cho tunnel : điền sub-domain, url (http://localhost)
+     sub-domain phải có trên iis
+     vd: sub-domain=hello.tdh.io.vn PHẢI có ở 2 nơi :
+       + router of cloudflare 
+       + IIS binding
+</code></pre>
+<hr>
+<div class="nhietdo">loading nd...</div>
+<div class="doam">loading da...</div>
+<div class="dienap">loading vol...</div>
+<div class="tieu-de">loading tieu de</div>
+
+<script>
+function xu_ly(json){
+	if(json.ok!=1){
+		console.log("có lỗi gì đó",json)
+	}else{
+	  //duyệt qua mảng json.data
+	  for(var item of json.data){
+	     //xuly rieng item.name=quat
+	     if(item.name=='quat'){
+	       //code riêng
+	       //thay đổi className thành 'quat stop' nếu value=0
+	       //thay đổi className thành 'quat run' nếu value=1
+	       if(item.value==0)
+	         $('.quat').removeClass('run').addClass('stop');
+	       else
+	         $('.quat').removeClass('stop').addClass('run');
+	     }else{
+		  	//console.warn('item in for: ',item);
+		  	//item.name === class name of div muốn show
+		  	//đè nội dung => mất focus vào selected
+		  	//=> sửa: chỉ đè khi có nội dung mới
+		  	var old_value = $(item.name).html();
+		  	var new_value = item.value+' '+item.unit;
+		  	if(old_value != new_value) $(item.name).html(new_value); 
+	  	}
+	  }
+	}
+}
+function get_api(){
+	fetch('/api.aspx?action=sensor')
+	.then( res  => { return res.json(); })
+	.then( json => { xu_ly(json); })
+	.catch( error => { console.error(error); });
+
+}
+setInterval(function(){get_api()}, 1000); //1000ms == 1s : mỗi s thì gọi get_api
+$('.move').draggable().resizable();
+</script>
+</body>
+</html>
